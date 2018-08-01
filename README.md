@@ -1,2 +1,2 @@
-# NewlibMarkup2SphinxConvertorPrivate
-(PRIVATE) This repo contains code for NewlibMarkup2SphinxConvertorPrivate.
+# NewlibMarkup2SphinxConverter
+This repo contains code for NewlibMarkup2SphinxConvertorPrivate.
