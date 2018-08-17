@@ -31,6 +31,8 @@
 
 import argparse
 import makedoc2rst
+import os
+import sys
 
 
 def get_parser():
@@ -49,10 +51,19 @@ def get_parser():
         type=str,
         help='Path of destination file with rst markup',
     )
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
     return parser
 
 
 def main(c_file, rst_file):
+    if not os.path.exists(c_file):
+        print("C source file {f} does not exist!".format(f=c_file))
+        sys.exit(1)
+    if os.path.exists(rst_file) and not os.access(rst_file, os.W_OK):
+        print("Can not write to file {f}".format(f=rst_file))
+        sys.exit(1)
     makedoc2rst.makedoc2rst(c_file, rst_file).convert()
 
 
