@@ -29,60 +29,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-
 import argparse
-import re
-import rst
-
-
-def is_command(s):
-    """
-    A command is a single word of at least 3 characters, all uppercase
-    :param s: input string
-    :return: True if s is a single command, otherwise False
-    """
-    return True if re.match('^[A-Z_]{3,}\s*$', s) else False
-
-
-def extract_comments(content):
-    """
-    Extract content inside of /* */
-    :param content: input file content
-    :return: extracted comments
-    """
-    comments = ''
-    comments_match = re.match('/\*(\*(?!/)|[^*])*\*/', content)
-    if comments_match:
-        wrapped_comments = comments_match.group()
-        comments = wrapped_comments.lstrip('/*').rstrip('*/').lstrip().rstrip()
-    return comments
-
-
-def extract_command_and_text(content):
-    """
-    Extract command and text from input string content
-    :param content: input string containing command and text
-    :return: a tuple containing command and text
-    """
-    command = ''
-    text = ''
-    command_text_dict = {}
-    for line in content.splitlines():
-        if is_command(line):
-            if command and text:
-                command_text_dict[command] = text
-            command = line.rstrip()
-            text = ''
-        else:
-            text += line + '\n'
-    return command_text_dict
-
-
-def generate_rst(command_text_dict):
-    rst_str = ''
-    for command, text in command_text_dict.items():
-        rst_str += rst.get_command_processor(command)(command, text)
-    return rst_str
+import makedoc2rst
 
 
 def get_parser():
@@ -90,36 +38,24 @@ def get_parser():
         description='Convert newlib style markup to rst markup'
     )
     parser.add_argument(
-        '-s',
-        '--source_file_dir',
+        '-c',
+        '--c_file_path',
         type=str,
-        help='Source file directory with newlib style comments',
+        help='Path of c source file with newlib style comments',
     )
     parser.add_argument(
-        '-d',
-        '--dest_file_dir',
+        '-r',
+        '--rst_file_path',
         type=str,
-        help='Destination directory for converted rst markup file',
+        help='Path of destination file with rst markup',
     )
     return parser
 
 
-def main(source_file_dir, dest_file_dir):
-    with open(source_file_dir, 'r') as source_file, open(dest_file_dir, 'w') as dest_file:
-        file_content = source_file.read()
-
-        # Get comments inside of /* */
-        comments = extract_comments(file_content)
-
-        # Parse comments
-        command_text_dict = extract_command_and_text(comments)
-
-        # Process text based on command type
-        rst_str = generate_rst(command_text_dict)
-
-        dest_file.write(rst_str)
+def main(c_file, rst_file):
+    makedoc2rst.makedoc2rst(c_file, rst_file).convert()
 
 
 if __name__ == '__main__':
     args = get_parser().parse_args()
-    main(args.source_file_dir, args.dest_file_dir)
+    main(args.c_file_path, args.rst_file_path)
