@@ -101,4 +101,3 @@ def gen_nothing(command, text):
 
 def gen_custom_directives(command, text):
     return '**{c}:**\n\n{t}\n\n'.format(c=command, t=text)
-
