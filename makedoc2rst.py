@@ -49,6 +49,9 @@ class makedoc2rst():
         with open(self.c_file, 'r') as c_file:
             # Get comments inside of /* */
             comments = self._extract_comments(c_file.read())
+            if comments == "":
+                print("Cannot find Newlib style comments in {f}".format(f=self.c_file))
+                return ''
 
             # Parse comments
             command_text_list = []
