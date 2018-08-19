@@ -130,3 +130,4 @@ class makedoc2rst():
             '<https://sourceware.org/newlib/>`_.'
         )
         return [('ORIGIN', origin)]
+

@@ -70,3 +70,4 @@ def main(c_file, rst_file):
 if __name__ == '__main__':
     args = get_parser().parse_args()
     main(args.c_file_path, args.rst_file_path)
+
