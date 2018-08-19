@@ -29,6 +29,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+import datetime
 import re
 import rst
 
@@ -48,11 +49,20 @@ class makedoc2rst():
         with open(self.c_file, 'r') as c_file:
             # Get comments inside of /* */
             comments = self._extract_comments(c_file.read())
+
             # Parse comments
-            command_text_dict = self._extract_command_and_text(comments)
+            command_text_list = []
+            command_text_list.extend(self._insert_comment_block(self.c_file))
+            command_text_list.extend(self._extract_command_and_text(comments))
+            command_text_list.extend(self._append_origin_block())
+
             # Process text based on command type
-            for command, text in command_text_dict.items():
-                rst_str += rst.get_command_processor(command)(command, text)
+            for command, text in command_text_list:
+                transformed_command = rst.transform_command(command)
+                transformed_text = rst.transform_text(command, text)
+                rst_str += rst.get_command_processor(command)(
+                    transformed_command, transformed_text
+                )
 
         with open(self.rst_file, 'w') as rst_file:
             rst_file.write(rst_str)
@@ -73,7 +83,7 @@ class makedoc2rst():
         :return: extracted comments
         """
         comments = ''
-        comments_match = re.match('/\*(\*(?!/)|[^*])*\*/', content)
+        comments_match = re.search('/\*\nFUNCTION(\*(?!/)|[^*])*\*/', content)
         if comments_match:
             wrapped_comments = comments_match.group()
             comments = wrapped_comments.lstrip('/*').rstrip('*/').lstrip().rstrip()
@@ -83,17 +93,40 @@ class makedoc2rst():
         """
         Extract command and text from input string content
         :param comments: input string containing command and text
-        :return: a tuple containing command and text
+        :return: a list containing (command, text) tuple
         """
         command = ''
         text = ''
-        command_text_dict = {}
+        command_text_list = []
         for line in comments.splitlines():
             if self._is_command(line):
                 if command and text:
-                    command_text_dict[command] = text
+                    command_text_list.append((command, text))
                 command = line.rstrip()
                 text = ''
             else:
                 text += line + '\n'
-        return command_text_dict
+        return command_text_list
+
+    def _insert_comment_block(self, c_file):
+        """
+        Insert C source file name and date info to the RST file
+        :param command_text_list: original command_text_list
+        :return: command_text_list with custom comment block
+        """
+        return [
+            ('COMMENT', 'This file was automatically generated from the file:'),
+            ('COMMENT', c_file),
+            ('COMMENT', 'Generated on: {date}'.format(
+                date=datetime.datetime.today().strftime('%Y-%m-%d'),
+            ),
+            ),
+        ]
+
+    def _append_origin_block(self):
+        origin = (
+            'The information in this section was generated from '
+            'documentation included with the `Newlib C Library '
+            '<https://sourceware.org/newlib/>`_.'
+        )
+        return [('ORIGIN', origin)]
