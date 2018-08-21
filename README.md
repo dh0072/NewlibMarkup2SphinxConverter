@@ -27,7 +27,7 @@ Example invocation:
 ./gen_rst_from_makedoc.py -c ../newlib-cygwin/newlib/libc/string/strcmp.c -r example_rst.rst
 ```
 
-## Supported Input makedoc Commands:
+## Supported Input makedoc Commands
 1. FUNCTION
 2. SYNOPSIS
 3. ANSI_SYNOPSIS
@@ -48,7 +48,8 @@ Example invocation:
 18. END
 19. SEEALSO
 
-## Supported Output reStructued Markup:
+## Supported Output reStructued Markup
+```
 1. **strong emphasi**
 2. Directive: code-block, custom
 3. *emphasis*/Italics
@@ -56,3 +57,4 @@ Example invocation:
 5. `interpreted text`
 6. ``inline literal``
 7. `phrase reference`_
+```
